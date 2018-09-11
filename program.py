@@ -43,8 +43,12 @@ def run_loop(data):
             od = collections.OrderedDict(od)
             print(od, type(od))
             final_dict = distribute_under(od, total_money, tip_total_under)
+            print('------------------')
+
             for key, val in final_dict.items():
-                print(key, ": ", val)
+                print('{0:10} : {1:3}'.format(key, val))
+                print('------------------')
+
         elif cmd == 'r':
             for idx, x in enumerate(data):
                 print(idx + 1, x)
@@ -222,7 +226,7 @@ def print_partners_plus_hours(partners, hours):
     :return:
     """
     for x in range(0, len(partners)):
-        print(partners[x] + ' : ' + hours[x])
+        print('{0:2d} {1:3d}'.format(partners[x], hours[x]))
 
 
 """
