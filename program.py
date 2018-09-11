@@ -20,15 +20,14 @@ def run_loop(data):
     :param data: The list of partners at the store
     :return: -
     """
-    # todo Check for partners.txt.
     while True:
-        cmd = input('[E]nter tip data, [R]emove Partners, [A]dd partners, or [Q]uit : ').lower()
+        cmd = input('[E]nter tip data, [R]emove Partners, [A]dd partners, [L]ist, or [Q]uit : ').lower()
         if cmd == 'e':
             hours_list = input_hours(data)
             # if the user enters Q then the program closes nicely
             if hours_list is None:
-                print('quitting program.')
-                break
+                print('No data entered.')
+                continue
 
             partner_dict = dict(zip(data, hours_list))
 
@@ -47,35 +46,43 @@ def run_loop(data):
             for key, val in final_dict.items():
                 print(key, ": ", val)
         elif cmd == 'r':
-            for x in data:
-                print(x)
-            partner = 'Empty'
+            for idx, x in enumerate(data):
+                print(idx + 1, x)
+            # partner = 'Empty'
             print(
                 'Please enter the name of the partner you need to remove\n'
-                ' (type print to see current list)\n'
-                ' (type done when finished)\n')
-            while partner != 'done' or partner != 'd':
-                partner = input('Input: ')
-                if partner == 'done' or partner == 'd':
-                    file_manager.save('partners', data)
-                    break
-                elif partner == 'p' or partner == 'print':
-                    for x in data:
-                        print(x)
-                else:
-                    data = file_manager.remove_entry(partner, data)
+                ' (Enter a -1 to cancel.)\n')
+
+            while True:
+                try:
+                    cmd = int(input('Index: '))
+                    if cmd < 0:
+                        file_manager.save('partners', data)
+                        break
+                    else:
+                        data = file_manager.remove_entry(cmd - 1, data)
+                except ValueError:
+                    print("you must enter an integer")
 
         elif cmd == 'a':
             new_partner = 'Empty'
-            print('please enter the name of the new partner\n '
-                  ' (type done when finished)')
+            print('Please enter the name of the new partner\n'
+                  ' (type "print" to see current list)\n'
+                  ' (type "done" when finished)')
             while new_partner != 'done' or new_partner != 'd':
                 new_partner = input('Input: ')
-                if new_partner == 'done' or new_partner == 'd':
+                if new_partner == 'done' or new_partner == 'd' or new_partner == '-1':
                     file_manager.save('partners', data)
                     break
+                elif new_partner == 'p' or new_partner == 'print':
+                    for x in data:
+                        print(x)
+                    print('')
                 else:
                     file_manager.add_entry(new_partner, data)
+        elif cmd == 'l':
+            for x in data:
+                print(x)
         elif cmd == "q":
             print('quitting program.')
             break
@@ -106,16 +113,29 @@ def input_hours(data):
     :param data: Partner List.
     :return: Returns a list of hours.
     """
-    print('Please input the hours worked for each partner.')
+    print('Please input the hours worked for each partner.'
+          ' (Enter a -1 to cancel.)')
     hours = []
-
+    good_data = True
     for x in range(0, len(data)):
+        # cmd = input(data[x] + ': ')
+        while True:
+            try:
+                cmd = float(input(data[x] + ': '))
+                break
+            except ValueError:
+                print("you must enter an integer")
+        if float(cmd) < 0:
+            return None
+        else:
+            hours.append(float(cmd))
+        """
         cmd = input(data[x] + ': ')
         if cmd.lower() == 'q':
             return None
         else:
             hours.append(float(cmd))
-
+        """
     return hours
 
 

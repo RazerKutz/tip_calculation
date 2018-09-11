@@ -36,9 +36,7 @@ def add_entry(text, data):
     data.append(text)
 
 
-def remove_entry(text, data):
+def remove_entry(num, data):
     new_data = []
-    for line in data:
-        if text != line:
-            new_data.append(line)
-    return new_data
+    del data[num]
+    return data
