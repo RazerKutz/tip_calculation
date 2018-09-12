@@ -52,7 +52,6 @@ def run_loop(data):
         elif cmd == 'r':
             for idx, x in enumerate(data):
                 print(idx + 1, x)
-            # partner = 'Empty'
             print(
                 'Please enter the name of the partner you need to remove\n'
                 ' (Enter a -1 to cancel.)\n')
