@@ -1,16 +1,26 @@
 import collections
 import file_manager
 
+debug = True
+
 
 def main():
     """
     Starts the program
     :return: -
     """
+    partner_data = []
+    partner = {'partner': {'name': '', 'hours': '', 'tips': ''}}
     print_header()
-    partner_data = file_manager.load('partners')
+    # partner_data['partner'] = file_manager.load('partners')
+    partner_list = file_manager.load('partners')
+    for idx, x in enumerate(partner_list):
+        partner = x['partner']
+        partner_data.append(partner)
     if partner_data.__len__() == 0:
+        # broken as of now.
         input_partners_manual(partner_data)
+    print(partner_data)
     run_loop(partner_data)
 
 
@@ -20,35 +30,38 @@ def run_loop(data):
     :param data: The list of partners at the store
     :return: -
     """
+
     while True:
         cmd = input('[E]nter tip data, [R]emove Partners, [A]dd partners, [L]ist, or [Q]uit : ').lower()
         if cmd == 'e':
-            hours_list = input_hours(data)
+            sum_hours = 0
+            # input_hours(data)
             # if the user enters Q then the program closes nicely
-            if hours_list is None:
+            if input_hours(data) is None:
                 print('No data entered.')
                 continue
 
-            partner_dict = dict(zip(data, hours_list))
+            # partner_dict = dict(zip(data, hours_list))
 
             total_money = float(input('Total tips: '))
+            for x in data:
+                sum_hours += x['hours']
 
-            tips_per_hour = calc_tph(sum(partner_dict.values()), total_money)
+            tips_per_hour = calc_tph(sum_hours, total_money)
             tips_per_hour = float("%.3f" % tips_per_hour)
             print(tips_per_hour)
-            partner_dict_idph = calc_idph(tips_per_hour, partner_dict)
+            calc_idph(tips_per_hour, data)
 
-            tip_total_under = calc_under(partner_dict_idph)
-            od = sort_dec(partner_dict_idph)
-            od = collections.OrderedDict(od)
-            print(od, type(od))
-            final_dict = distribute_under(od, total_money, tip_total_under)
-            for key, val in final_dict.items():
-                print(key, ": ", val)
+            tip_total_under = calc_under(data)
+            od = sort_dec(data)
+            # od = collections.OrderedDict(od)
+            # print(od, type(od))
+            final_list = distribute_under(od, total_money, tip_total_under)
+            for v in final_list:
+                print("{0:4s} : {1:2d}".format(v['name'], int(v['tips'])))
         elif cmd == 'r':
             for idx, x in enumerate(data):
                 print(idx + 1, x)
-            # partner = 'Empty'
             print(
                 'Please enter the name of the partner you need to remove\n'
                 ' (Enter a -1 to cancel.)\n')
@@ -102,7 +115,9 @@ def input_partners_manual(data):
 
     print(type(int(count)), ' ' + count)
     for x in range(0, int(count)):
-        data.append(input('Partner Name: '))
+        partner = {'partner': {'name': '', 'hours': '', 'tips': ''}}
+        partner['partner']['name'] = input('Partner Name: ')
+        data.append(partner)
     file_manager.save('partners', data)
     return list
 
@@ -113,30 +128,36 @@ def input_hours(data):
     :param data: Partner List.
     :return: Returns a list of hours.
     """
+    h = [17.45, 8.30, 13.20, 4.05, 29.45, 14.15, 34.65, 31.65, 24.20, 13.65, 24.05, 36.45, 19.65, 23.30, 9.55, 12.85,
+         22.95, 8.35, 8.15, 14.70]
     print('Please input the hours worked for each partner.'
           ' (Enter a -1 to cancel.)')
     hours = []
-    good_data = True
-    for x in range(0, len(data)):
-        # cmd = input(data[x] + ': ')
-        while True:
-            try:
-                cmd = float(input(data[x] + ': '))
-                break
-            except ValueError:
-                print("you must enter an integer")
-        if float(cmd) < 0:
-            return None
-        else:
-            hours.append(float(cmd))
-        """
-        cmd = input(data[x] + ': ')
-        if cmd.lower() == 'q':
-            return None
-        else:
-            hours.append(float(cmd))
-        """
-    return hours
+    if debug == True:
+        for val, x in enumerate(data):
+            x['hours'] = h[val]
+    else:
+        for x in data:
+            # cmd = input(data[x] + ': ')
+            while True:
+                try:
+
+                    cmd = float(input(x['name'] + ': '))
+                    break
+                except ValueError:
+                    print("you must enter an integer")
+            if float(cmd) < 0:
+                return None
+            else:
+                x['hours'] = float(cmd)
+            """
+            cmd = input(data[x] + ': ')
+            if cmd.lower() == 'q':
+                return None
+            else:
+                hours.append(float(cmd))
+            """
+    return data
 
 
 def calc_tph(total_hours, tip_amount):
@@ -149,36 +170,44 @@ def calc_tph(total_hours, tip_amount):
     return tip_amount / total_hours
 
 
-def calc_idph(tph, dictionary):
+# def calc_idph(tph, dictionary):
+def calc_idph(tph, data):
     """
     Calculates each partners total tips.
     :param tph: The value calculated by calc_tph.
     :param dictionary: Dictionary with name : hours
     :return: Dictionary with partner name : total tips for the week
     """
-    return {k: float("%.2f" % (dictionary[k] * tph)) for k in dictionary}
+
+    for x in data:
+        # x['tips'] = "%.2f" % x['hours'] * tph
+        x['tips'] = float("%.2f" % (x['hours'] * tph))
+    # return data
 
 
-def calc_under(p_dict):
+def calc_under(data):
     """
     this sums the "total tips for week" for each partner with out the decimal value.
     :param p_dict: Dictionary with partner name : total tips for the week
     :return: Sum of the total tips with out decimals.
     """
-    p2_dict = {k: int(p_dict[k]) for k in p_dict}
-    return sum(p2_dict.values())
+    sum_tips = 0
+    for x in data:
+        sum_tips += int(x['tips'])
+
+    return sum_tips
 
 
-def sort_dec(p_dict):
+def sort_dec(data):
     """
     sorts the decimals in descending order.
     :param p_dict: Dictionary with partner name : total tips for the week
     :return: Dictionary with partner name : total tips for the week but sorted with higher decimals at the top.
     """
-    return sorted(p_dict.items(), key=lambda kv: kv[1] % 1, reverse=True)
+    return sorted(data, key=lambda kv: kv['tips'] % 1, reverse=True)
 
 
-def distribute_under(p_dict, money, money_under):
+def distribute_under(data, money, money_under):
     """
     takes the total tips of the store and subtracts the calc_under amount from it to get the total money left over.
     :param p_dict: Dictionary with partner name : total tips for the week
@@ -190,17 +219,16 @@ def distribute_under(p_dict, money, money_under):
     extra = money - money_under
 
     print('DEBUG: Before the rounding')
-
-    print(p_dict)
-    p_dict = {k: int(p_dict[k]) for k in p_dict}
+    # od = []
+    # od = {k: int(k['tips']) for k in data}
     count = 0
-    print(p_dict, type(p_dict))
-    for x, y in p_dict.items():
+    print(data, type(data))
+    for z in data:
         if count < extra:
-            p_dict[x] = p_dict.get(x) + 1
+            z['tips'] = int(z['tips']) + 1
             count += 1
 
-    return p_dict
+    return data
 
 
 def print_header():

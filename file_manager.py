@@ -1,7 +1,7 @@
 """
 
 """
-
+import json
 import os
 
 
@@ -16,8 +16,9 @@ def load(name):
 
     if os.path.exists(filename):
         with open(filename) as fin:
-            for entry in fin.readlines():
-                data.append(entry.rstrip())
+            # for entry in fin.readlines():
+            #     data.append(entry.rstrip())
+            data = json.load(fin)
 
     return data
 
@@ -33,8 +34,9 @@ def save(name, data):
     print("..... saving to: {}".format(filename))
 
     with open(filename, 'w') as fout:
-        for entry in data:
-            fout.write(entry + '\n')
+        # for entry in data:
+        # fout.write(entry)
+        json.dump(data, fout)
 
 
 def get_full_pathname(name):
@@ -64,6 +66,5 @@ def remove_entry(num, data):
     :param data: the list to remove the index from
     :return:
     """
-    new_data = []
     del data[num]
     return data
