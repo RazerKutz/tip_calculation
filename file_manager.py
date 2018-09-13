@@ -49,6 +49,7 @@ def get_full_pathname(name):
     return filename
 
 
+# TODO Fix this so it works with the new data format.
 def add_entry(name, data):
     """
     adds a name to the list
@@ -59,6 +60,7 @@ def add_entry(name, data):
     data.append(name)
 
 
+# TODO Fix this so it works with the new data format.
 def remove_entry(num, data):
     """
     removes a specified index from data

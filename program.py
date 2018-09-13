@@ -9,18 +9,21 @@ def main():
     Starts the program
     :return: -
     """
+
     partner_data = []
-    partner = {'partner': {'name': '', 'hours': '', 'tips': ''}}
+    partner = {'name': '', 'hours': 0, 'tips': 0}
     print_header()
     # partner_data['partner'] = file_manager.load('partners')
     partner_list = file_manager.load('partners')
     for idx, x in enumerate(partner_list):
-        partner = x['partner']
+        partner = x
         partner_data.append(partner)
     if partner_data.__len__() == 0:
         # broken as of now.
         input_partners_manual(partner_data)
-    print(partner_data)
+    if debug is True:
+        print(partner_data)
+
     run_loop(partner_data)
 
 
@@ -40,9 +43,7 @@ def run_loop(data):
             if input_hours(data) is None:
                 print('No data entered.')
                 continue
-
-            # partner_dict = dict(zip(data, hours_list))
-
+            # TODO Fix so that it handles unexpected results.
             total_money = float(input('Total tips: '))
             for x in data:
                 sum_hours += x['hours']
@@ -57,8 +58,15 @@ def run_loop(data):
             # od = collections.OrderedDict(od)
             # print(od, type(od))
             final_list = distribute_under(od, total_money, tip_total_under)
-            for v in final_list:
-                print("{0:4s} : {1:2d}".format(v['name'], int(v['tips'])))
+
+            if debug is True:
+                checksum = 0
+                for s in data:
+                    checksum += int(s['tips'])
+                print(checksum)
+
+            pretty_print(final_list)
+
         elif cmd == 'r':
             for idx, x in enumerate(data):
                 print(idx + 1, x)
@@ -94,8 +102,7 @@ def run_loop(data):
                 else:
                     file_manager.add_entry(new_partner, data)
         elif cmd == 'l':
-            for x in data:
-                print(x)
+            pretty_print(data)
         elif cmd == "q":
             print('quitting program.')
             break
@@ -133,9 +140,10 @@ def input_hours(data):
     print('Please input the hours worked for each partner.'
           ' (Enter a -1 to cancel.)')
     hours = []
-    if debug == True:
+    if debug is True:
         for val, x in enumerate(data):
             x['hours'] = h[val]
+
     else:
         for x in data:
             # cmd = input(data[x] + ': ')
@@ -217,12 +225,12 @@ def distribute_under(data, money, money_under):
     """
     money = int(money)
     extra = money - money_under
-
-    print('DEBUG: Before the rounding')
+    if debug is True:
+        print('DEBUG: Before the rounding')
+        print(data, type(data))
     # od = []
     # od = {k: int(k['tips']) for k in data}
     count = 0
-    print(data, type(data))
     for z in data:
         if count < extra:
             z['tips'] = int(z['tips']) + 1
@@ -232,9 +240,22 @@ def distribute_under(data, money, money_under):
 
 
 def print_header():
-    print('------------------------')
-    print('     Tip Calculation')
-    print('------------------------')
+    if debug is True:
+        print('-------------------------')
+        print('     Tip Calculation')
+        print(' !!!Debugging Enabled!!!')
+        print('-------------------------')
+    else:
+        print('-------------------------')
+        print('     Tip Calculation')
+        print('-------------------------')
+
+
+def pretty_print(data):
+    print('--------------------------------------------')
+    for v in data:
+        print("| {0:15} {1:>2} {2:<7} {3:>7}{4:<2} |".format(v['name'], 'Hours:', v['hours'], '$', int(v['tips'])))
+        print('--------------------------------------------')
 
 
 """
@@ -251,6 +272,13 @@ def print_partners_plus_hours(partners, hours):
     """
     for x in range(0, len(partners)):
         print(partners[x] + ' : ' + hours[x])
+
+
+def re_init(data):
+    for x in data:
+        x['hours'] = 0
+        x['tips'] = 0
+    file_manager.save('partners', data)
 
 
 """
