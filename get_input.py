@@ -26,7 +26,7 @@ def input_hours(data, debug):
     :param data: A list of dictionaries that store the user data
     :return: Returns a list of hours.
     """
-    print('Please input the hours worked for each partner.'
+    print('Please input the hours worked for each partner.\n'
           ' (Enter a -1 to cancel.)')
     hours = []
     if debug is True:

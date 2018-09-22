@@ -78,15 +78,14 @@ def get_full_pathname(name):
     return filename
 
 
-def add_entry(name, data, format):
+def add_entry(data, format):
     """
     adds a name to the list
     :param name: the name to be added.
     :param data: the list to add the name to.
     :return: -
     """
-    format['name'] = name
-    data.append(format)
+    data.insert(format['index'], format)
 
 
 def remove_entry(num, data):
@@ -97,4 +96,7 @@ def remove_entry(num, data):
     :return:
     """
     del data[num]
+    for x in data:
+        if x['index'] > num:
+            x['index'] = x['index'] - 1
     return data

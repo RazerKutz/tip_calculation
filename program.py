@@ -2,7 +2,7 @@ import file_manager
 import get_input
 import calculate
 
-debug = True
+debug = False
 
 
 def main():
@@ -69,6 +69,8 @@ def run_loop(data):
             pretty_print_plus(final_list, tips_per_hour)
 
         elif cmd == 'r':
+            # TODO:ERROR When removing index positions it you remove pos 1 and then 2 you will get an error,
+            # because all the indacies have changed.
             for idx, x in enumerate(data):
                 print(idx + 1, x)
             print(
@@ -79,8 +81,12 @@ def run_loop(data):
                 try:
                     cmd = int(input('Index: '))
                     if cmd < 0:
-                        file_manager.save('partners', data)
-                        break
+                        if debug is True:
+                            print("Would save here.")
+                            break
+                        else:
+                            file_manager.save('partners', data)
+                            break
                     else:
                         data = file_manager.remove_entry(cmd - 1, data)
                 except ValueError:
@@ -88,21 +94,33 @@ def run_loop(data):
 
         elif cmd == 'a':
             new_partner = 'Empty'
-            partner = {'name': '', 'hours': 0, 'tips': 0}
-            print('Please enter the name of the new partner\n'
+            new_partner_dict = {'name': '', 'hours': 0, 'tips': 0}
+            pos = 0
+            print('Please enter the name of the new partner,\nthen the position in the list.\n'
+                  ' (1 is the first position in the list, 2 is the second position and so on.)\n'
                   ' (type "print" to see current list)\n'
                   ' (type "done" when finished)')
-            while new_partner != 'done' or new_partner != 'd':
+            while new_partner.lower() != 'done' or new_partner.lower() != 'd':
                 new_partner = input('Input: ')
-                if new_partner == 'done' or new_partner == 'd' or new_partner == '-1':
+
+                if new_partner.lower() == 'done' or new_partner.lower() == 'd' or new_partner == '-1':
                     file_manager.save('partners', data)
                     break
-                elif new_partner == 'p' or new_partner == 'print':
+                elif new_partner.lower() == 'p' or new_partner.lower() == 'print':
                     for x in data:
                         print(x)
                     print('')
                 else:
-                    file_manager.add_entry(new_partner, data, partner)
+                    while True:
+                        try:
+                            pos = int(input('Index: '))
+                            break
+                        except ValueError:
+                            print("you must enter an integer")
+
+                    new_partner_dict['name'] = new_partner
+                    new_partner_dict['index'] = pos - 1
+                    file_manager.add_entry(data, new_partner_dict)
         elif cmd == 'l':
             pretty_print(data)
         elif cmd == "q":
