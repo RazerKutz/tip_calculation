@@ -36,17 +36,52 @@ def run_loop(data):
     """
 
     while True:
-        cmd = input('[E]nter tip data, [R]emove Partners, [A]dd partners, [L]ist, or [Q]uit : ').lower()
+        cmd = input(
+            '[E]nter tip data, [R]emove Partners, [A]dd partners, [L]ist, or [Q]uit : ').lower()
         if cmd == 'e':
+            if file_manager.temp_file_check() is True:
+                print_hours(data)
+                # TODO This shit is broke AF
+                while True:
+                    try:
+                        cmd = int(input('Index: '))
+                        if cmd < 0:
+                            if debug is True:
+                                print("Would save here.")
+                                break
+                            else:
+                                file_manager.save_temp(data)
+                                break
+                        else:
+                            for x in data:
+                                if x["index"] == cmd:
+                                    try:
+                                        cmd = float(input(x['name'] + ': '))
+                                    except ValueError:
+                                        print("you must enter an integer")
+                                    if float(cmd) < 0:
+                                        continue
+                                    else:
+                                        x['hours'] = float(cmd)
+                                        break
+                                        # print(data)
+                    except ValueError:
+                        print("you must enter an integer")
             sum_hours = 0
             # if the user enters -1 then the program closes nicely
-            data = get_input.input_hours(data, debug)
-            if data is None:
-                print('No data entered.')
-                continue
+            if file_manager.temp_file_check() is False:
+                data = get_input.input_hours(data, debug)
+                if data is None:
+                    print('No data entered.')
+                    continue
             # print(data)
             # TODO Fix so that it handles unexpected results.
-            total_money = float(input('Total tips: '))
+            if file_manager.temp_file_check() is True:
+                print(
+                    "Total Tips is {}. Enter a new value or -1 to keep this value.".format(total_money))
+            input_val = float(input('Total tips: '))
+            if input_val > -1:
+                total_money = input_val
             for x in data:
                 sum_hours += x['hours']
 
@@ -56,8 +91,10 @@ def run_loop(data):
             calculate.itph(tips_per_hour, data)
 
             tip_total_under = calculate.under(data)
+            print("Tips Under {}".format(total_money - tip_total_under))
             od = calculate.sort_dec(data)
-            final_list = calculate.distribute_under(od, total_money, tip_total_under, debug)
+            final_list = calculate.distribute_under(
+                od, total_money, tip_total_under, debug)
 
             if debug is True:
                 checksum = 0
@@ -67,10 +104,8 @@ def run_loop(data):
             final_list = sort_by_index(final_list)
             # pretty_print(final_list)
             pretty_print_plus(final_list, tips_per_hour)
-
+            file_manager.save_temp(data)
         elif cmd == 'r':
-            # TODO:ERROR When removing index positions it you remove pos 1 and then 2 you will get an error,
-            # because all the indacies have changed.
             for idx, x in enumerate(data):
                 print(idx + 1, x)
             print(
@@ -89,6 +124,8 @@ def run_loop(data):
                             break
                     else:
                         data = file_manager.remove_entry(cmd - 1, data)
+                        for idx, x in enumerate(data):
+                            print(idx + 1, x)
                 except ValueError:
                     print("you must enter an integer")
 
@@ -152,17 +189,38 @@ def print_header():
 def pretty_print(data):
     print('--------------------------------------------')
     for v in data:
-        print("| {0:15} {1:>2} {2:<7} {3:>7}{4:<2}|".format(v['name'], 'Hours:', v['hours'], '$', int(v['tips'])))
+        print("| {0:15} {1:>2} {2:<7} {3:>7}{4:<2}|".format(
+            v['name'], 'Hours:', v['hours'], '$', int(v['tips'])))
         print('--------------------------------------------')
 
 
 def pretty_print_plus(data, t_per_h):
-    print('-----------------------------------------------------------')
+    print('---------------------------------------------------------------')
     for v in data:
-        print("| {0:15} {1:>2} {2:<7} {3:>7}{4:<3} {5:<7} {6:<3} |".format(v['name'], 'Hours:', v['hours'], '$',
-                                                                           int(v['tips']), 'unrnd:',
-                                                                           float("%.3f" % (v['hours'] * t_per_h))))
-        print('-----------------------------------------------------------')
+        if (float("%.3f" % (v['hours'] * t_per_h)) - float(v['tips'])) < 0:
+            rounded = "True"
+        else:
+            rounded = "False"
+        print("| {0:15} {1:>2} {2:<7} {3:>7}{4:<3} {5:<7} {6:<3} {7:<3} |".format(v['name'],  # 0
+                                                                                  'Hours:',  # 1
+                                                                                  # 2
+                                                                                  v['hours'],
+                                                                                  '$',  # 3
+                                                                                  int(
+                                                                                      v['tips']),  # 4
+                                                                                  'unrnd:',  # 5
+                                                                                  rounded,  # 6
+                                                                                  float(
+                                                                                      "%.3f" % (v['hours'] * t_per_h))))  # 6
+        print('---------------------------------------------------------------')
+
+
+def print_hours(data):
+    print('----------------------------------------------')
+    for v in data:
+        print("| {0}{1} {2:15} {3:>2} {4:<7} |".format(
+            'index: ', v['index'], v['name'], 'Hours:', v['hours']))
+        print('----------------------------------------------')
 
 
 """
