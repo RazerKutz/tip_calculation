@@ -236,7 +236,7 @@ def print_partners_plus_hours(partners, hours):
     :return:
     """
     for x in range(0, len(partners)):
-        print(partners[x] + ' : ' + hours[x])
+        print('{0:2d} {1:3d}'.format(partners[x], hours[x]))
 
 
 def re_init(data):
