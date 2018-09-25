@@ -1,7 +1,7 @@
 """
 
 """
-
+import json
 import os
 
 
@@ -16,8 +16,9 @@ def load(name):
 
     if os.path.exists(filename):
         with open(filename) as fin:
-            for entry in fin.readlines():
-                data.append(entry.rstrip())
+            # for entry in fin.readlines():
+            #     data.append(entry.rstrip())
+            data = json.load(fin)
 
     return data
 
@@ -33,8 +34,38 @@ def save(name, data):
     print("..... saving to: {}".format(filename))
 
     with open(filename, 'w') as fout:
-        for entry in data:
-            fout.write(entry + '\n')
+        # for entry in data:
+        # fout.write(entry)
+        json.dump(data, fout)
+
+
+def save_temp(data):
+    """
+    Saves the data to the file "name"
+    :param name: Name of the file to save to.
+    :param data: the data you want to save to the file.
+    :return: -
+    """
+    filename = get_full_pathname('partners_temp')
+    print("..... saving to: {}".format(filename))
+
+    with open(filename, 'w') as fout:
+        # for entry in data:
+        # fout.write(entry)
+        json.dump(data, fout)
+
+
+def remove_temp():
+    filename = get_full_pathname('partners_temp')
+    os.remove(filename)
+
+
+def temp_file_check():
+    filename = get_full_pathname('partners_temp')
+    if os.path.isfile(filename):
+        return True
+    else:
+        return False
 
 
 def get_full_pathname(name):
@@ -47,14 +78,14 @@ def get_full_pathname(name):
     return filename
 
 
-def add_entry(name, data):
+def add_entry(data, format):
     """
     adds a name to the list
     :param name: the name to be added.
     :param data: the list to add the name to.
     :return: -
     """
-    data.append(name)
+    data.insert(format['index'], format)
 
 
 def remove_entry(num, data):
@@ -64,6 +95,8 @@ def remove_entry(num, data):
     :param data: the list to remove the index from
     :return:
     """
-    new_data = []
     del data[num]
+    for x in data:
+        if x['index'] > num:
+            x['index'] = x['index'] - 1
     return data
